@@ -12,6 +12,7 @@ env/
 assessiq/backend/data/users.json
 backend/data/users.json
 dist/
+frontend/dist/
 build/
 .vite/
 .DS_Store
