@@ -5,7 +5,7 @@ AssessIQ is a React + FastAPI intelligent online olympiad assessment system with
 ## Run Backend
 
 ```powershell
-cd assessiq\backend
+cd backend
 py -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
@@ -19,7 +19,7 @@ If `py` is unavailable, install Python 3.11+ first.
 Use Node 20.19+ or Node 22.12+.
 
 ```powershell
-cd assessiq\frontend
+cd frontend
 npm install
 npm run dev
 ```
@@ -48,4 +48,3 @@ Run the backend once. It seeds:
 - Admin analytics
 - Question management
 - Test creation
-

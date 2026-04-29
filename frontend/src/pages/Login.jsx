@@ -1,76 +1,71 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import API from "../api"
+import { Brain, Lock, Mail, UserRound } from "lucide-react"
+import API from "../api.js"
 
 export default function Login() {
   const navigate = useNavigate()
   const [mode, setMode] = useState("login")
-  const [name, setName] = useState("")
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [role, setRole] = useState("student")
-  const [loading, setLoading] = useState(false)
+  const [form, setForm] = useState({ name: "Demo Student", email: "student@assessiq.dev", password: "student123", new_password: "", role: "student" })
   const [error, setError] = useState("")
-  const [success, setSuccess] = useState("")
+  const [message, setMessage] = useState("")
 
-  const submit = async (e) => {
-    e.preventDefault()
-    setLoading(true)
+  const submit = async (event) => {
+    event.preventDefault()
     setError("")
-    setSuccess("")
-    if (mode === "register") {
-      try {
-        await API.post("/auth/register", { name, email, password, role })
-        setSuccess("Registration successful. Welcome email sent. Please sign in.")
-        setMode("login")
-      } catch (err) {
-        setError(err?.response?.data?.detail || "Unable to register")
-      } finally {
-        setLoading(false)
-      }
-      return
-    }
+    setMessage("")
     try {
-      const res = await API.post("/auth/login", { email, password })
-      localStorage.setItem("assessiq_token", res.data.access_token)
-      localStorage.setItem("assessiq_user", JSON.stringify(res.data.user))
-      if (res.data.user.role === "teacher") {
-        navigate("/admin")
-      } else {
-        navigate("/")
+      if (mode === "forgot") {
+        const { data } = await API.post("/auth/forgot-password", { email: form.email, new_password: form.new_password })
+        setMessage(data.message)
+        setForm({ ...form, password: form.new_password, new_password: "" })
+        setMode("login")
+        return
       }
+      const path = mode === "register" ? "/auth/register" : "/auth/login"
+      const payload = mode === "register" ? form : { email: form.email, password: form.password }
+      const { data } = await API.post(path, payload)
+      localStorage.setItem("assessiq_token", data.access_token)
+      localStorage.setItem("assessiq_user", JSON.stringify(data.user))
+      navigate("/")
     } catch (err) {
-      setError(err?.response?.data?.detail || "Invalid login credentials")
-    } finally {
-      setLoading(false)
+      setError(err.response?.data?.detail || "Unable to continue")
     }
   }
 
   return (
-    <div className="page auth-page">
-      <form className="card auth-card" onSubmit={submit}>
-        <h1 className="auth-title">AssessIQ</h1>
-        <p className="auth-sub">Adaptive Olympiad Assessment Platform</p>
-        <div className="auth-tabs">
-          <button className={`btn tab ${mode === "login" ? "active" : ""}`} type="button" onClick={() => setMode("login")}>Sign In</button>
-          <button className={`btn tab ${mode === "register" ? "active" : ""}`} type="button" onClick={() => setMode("register")}>Create Account</button>
+    <div className="login-page">
+      <section className="login-visual">
+        <div className="logo-mark"><Brain size={42} /></div>
+        <h1>AssessIQ</h1>
+        <p>Intelligent performance prediction and adaptive assessment for online olympiad platforms.</p>
+        <div className="signal-grid">
+          <span>Adaptive Difficulty</span>
+          <span>Behavioral Analytics</span>
+          <span>Prediction Engine</span>
+          <span>Recommendations</span>
         </div>
+      </section>
+      <form className="auth-panel" onSubmit={submit}>
+        <div className="segmented">
+          <button type="button" className={mode === "login" ? "selected" : ""} onClick={() => setMode("login")}>Login</button>
+          <button type="button" className={mode === "register" ? "selected" : ""} onClick={() => setMode("register")}>Register</button>
+          <button type="button" className={mode === "forgot" ? "selected" : ""} onClick={() => setMode("forgot")}>Forgot</button>
+        </div>
+        {mode === "register" && <label><UserRound size={18} /><input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Name" /></label>}
+        <label><Mail size={18} /><input value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="Email" /></label>
+        {mode !== "forgot" && <label><Lock size={18} /><input type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} placeholder="Password" /></label>}
+        {mode === "forgot" && <label><Lock size={18} /><input type="password" value={form.new_password} onChange={(e) => setForm({ ...form, new_password: e.target.value })} placeholder="New password" /></label>}
         {mode === "register" && (
-          <input placeholder="Full name" value={name} onChange={(e) => setName(e.target.value)} />
-        )}
-        <input placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
-        <input placeholder="Password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
-        {mode === "register" && (
-          <select value={role} onChange={(e) => setRole(e.target.value)}>
+          <select value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })}>
             <option value="student">Student</option>
             <option value="teacher">Teacher</option>
           </select>
         )}
-        {error && <span className="error">{error}</span>}
-        {success && <span className="success">{success}</span>}
-        <button className="btn primary" disabled={loading} type="submit">
-          {loading ? "Please wait..." : mode === "login" ? "Sign In" : "Create Account"}
-        </button>
+        {error && <div className="error">{error}</div>}
+        {message && <div className="success">{message}</div>}
+        <button className="primary" type="submit">{mode === "login" ? "Enter AssessIQ" : mode === "register" ? "Create Account" : "Reset Password"}</button>
+        <button className="ghost" type="button" onClick={() => setForm({ ...form, email: "teacher@assessiq.dev", password: "teacher123" })}>Use teacher demo</button>
       </form>
     </div>
   )

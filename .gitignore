@@ -10,6 +10,7 @@ env/
 *.sqlite3
 *.log
 assessiq/backend/data/users.json
+backend/data/users.json
 dist/
 build/
 .vite/
