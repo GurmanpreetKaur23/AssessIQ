@@ -8,5 +8,11 @@ services:
       - SECRET_KEY=supersecret
       - AWS_REGION=us-east-1
       - SNS_TOPIC_ARN=
+      - AWS_ACCESS_KEY_ID=
+      - AWS_SECRET_ACCESS_KEY=
+      - FRONTEND_URL=
+      - GOOGLE_CLIENT_ID=
+      - GOOGLE_CLIENT_SECRET=
+      - GOOGLE_REDIRECT_URI=http://localhost:8000/auth/google/callback
     volumes:
       - ./backend:/app

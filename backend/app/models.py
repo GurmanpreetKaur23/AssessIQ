@@ -14,6 +14,7 @@ class User(Base):
     role=Column(String,default="student")
     created_at=Column(DateTime,default=datetime.utcnow)
     submissions=relationship("Submission",back_populates="user")
+    events=relationship("Event",back_populates="user")
 class Test(Base):
     __tablename__="tests"
     id=Column(Integer,primary_key=True,index=True)
@@ -41,3 +42,14 @@ class Submission(Base):
     time_taken=Column(Float,default=0.0)
     created_at=Column(DateTime,default=datetime.utcnow)
     user=relationship("User",back_populates="submissions")
+class Event(Base):
+    __tablename__="events"
+    id=Column(Integer,primary_key=True,index=True)
+    user_id=Column(Integer,ForeignKey("users.id"),nullable=True)
+    question_id=Column(Integer,nullable=True)
+    event_type=Column(String,nullable=False)
+    time_spent=Column(Float,default=0.0)
+    mouse_data=Column(Text,nullable=True)
+    revisit_count=Column(Integer,default=0)
+    created_at=Column(DateTime,default=datetime.utcnow)
+    user=relationship("User",back_populates="events")
